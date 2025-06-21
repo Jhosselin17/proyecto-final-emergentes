@@ -1,0 +1,71 @@
+{% extends 'base_cliente.html' %}
+{% block title %}Carrito{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4 text-center">🛒 Tu carrito de compras</h2>
+
+  {% if items %}
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle text-center">
+      <thead class="table-dark">
+        <tr>
+          <th>Imagen</th>
+          <th>Producto</th>
+          <th>Precio unitario</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>
+            <img src="{{ item.producto.imagen }}" alt="{{ item.producto.nombre }}"
+                 style="height: 70px; object-fit: contain;"
+                 onerror="this.onerror=null; this.src='https://via.placeholder.com/100x70?text=No+Img';">
+          </td>
+          <td>{{ item.producto.nombre }}</td>
+          <td>Bs {{ '%.2f'|format(item.producto.precio) }}</td>
+          <td>
+            <form action="{{ url_for('carrito.actualizar', id=item.id) }}" method="post" class="d-flex justify-content-center align-items-center">
+              <input type="number" name="cantidad" min="1" value="{{ item.cantidad }}" class="form-control form-control-sm" style="width: 70px;">
+              <button type="submit" class="btn btn-sm btn-outline-success ms-2" title="Actualizar cantidad">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </form>
+          </td>
+          <td>Bs {{ '%.2f'|format(item.producto.precio * item.cantidad) }}</td>
+          <td>
+            <a href="{{ url_for('carrito.eliminar', id=item.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">
+              <i class="fas fa-trash-alt"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="table-light fw-bold">
+          <td colspan="4" class="text-end">Total:</td>
+          <td colspan="2" class="text-start">Bs {{ '%.2f'|format(total) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="text-end mt-3">
+    <a href="#" class="btn btn-primary">
+      <i class="fas fa-check me-1"></i> Finalizar compra
+    </a>
+  </div>
+
+  {% else %}
+  <div class="alert alert-info text-center py-4">
+    <h5 class="mb-3">Tu carrito está vacío</h5>
+    <a href="{{ url_for('cliente.inicio') }}" class="btn btn-outline-primary">
+      <i class="fas fa-shopping-bag me-1"></i> Explorar productos
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

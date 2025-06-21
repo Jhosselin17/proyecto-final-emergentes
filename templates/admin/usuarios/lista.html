@@ -1,0 +1,56 @@
+{% extends 'base_admin.html' %}
+{% block title %}Gestión de Usuarios{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">👥 Gestión de Usuarios</h2>
+
+<div class="table-responsive animate__animated animate__fadeInUp">
+  <table class="table table-dark table-hover data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Usuario</th>
+        <th>Rol</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for usuario in usuarios %}
+      <tr>
+        <td>{{ usuario.id }}</td>
+        <td>{{ usuario.nombre }}</td>
+        <td>{{ usuario.username }}</td>
+        <td>{{ usuario.rol|capitalize }}</td>
+        <td>
+            <a href="{{ url_for('admin.editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-outline-warning me-2">
+            <i class="fas fa-edit"></i>
+            </a>
+          <a href="#" onclick="confirmDelete('{{ usuario.id }}')" class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-trash-alt"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function confirmDelete(id) {
+    Swal.fire({
+      title: '¿Eliminar usuario?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = `/admin/usuarios/eliminar/${id}`;
+      }
+    });
+  }
+</script>
+
+{% endblock %}

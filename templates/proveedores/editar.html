@@ -1,0 +1,22 @@
+{% extends 'base_admin.html' %}
+{% block title %}Editar Proveedor{% endblock %}
+{% block content %}
+<h2 class="mb-4">✏️ Editar Proveedor</h2>
+
+<form action="{{ url_for('proveedor.actualizar', id=proveedor.id) }}" method="POST" class="row g-3">
+  <div class="col-md-6">
+    <label for="nombre" class="form-label">Nombre</label>
+    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ proveedor.nombre }}" required>
+  </div>
+
+  <div class="col-md-6">
+    <label for="contacto" class="form-label">Contacto</label>
+    <input type="text" class="form-control" id="contacto" name="contacto" value="{{ proveedor.contacto }}">
+  </div>
+
+  <div class="col-12 mt-3">
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Guardar</button>
+    <a href="{{ url_for('proveedor.index') }}" class="btn btn-secondary ms-2">Cancelar</a>
+  </div>
+</form>
+{% endblock %}
