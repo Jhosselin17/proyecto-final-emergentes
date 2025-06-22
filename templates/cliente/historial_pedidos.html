@@ -1,0 +1,51 @@
+{% extends 'base_cliente.html' %}
+{% block title %}Mis pedidos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-4 text-center">📦 Historial de pedidos</h3>
+
+  {% if pedidos %}
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle text-center">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pedido in pedidos %}
+        <tr>
+          <td>{{ pedido.id }}</td>
+          <td>{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>Bs {{ '%.2f'|format(pedido.total) }}</td>
+          <td>
+            <span class="badge bg-{{ 
+              'warning' if pedido.estado == 'pendiente' 
+              else 'info' if pedido.estado == 'enviado' 
+              else 'success' if pedido.estado == 'entregado' 
+              else 'danger' }}">
+              {{ pedido.estado.capitalize() }}
+            </span>
+          </td>
+          <td>
+            <a href="{{ url_for('detalle_pedido.detalle_cliente', pedido_id=pedido.id) }}" class="btn btn-outline-primary btn-sm">
+              Ver detalle
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center">
+    No tenés pedidos registrados aún.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
