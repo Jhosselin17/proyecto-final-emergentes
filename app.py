@@ -1,9 +1,10 @@
 import os
 from flask import Flask, request, render_template, session
+from extensions import mail
 from database import db
 from models.usuario import Usuario
 from models.carrito import Carrito
-from models.direccion import Direccion  # Asegura que esté importada para crear la tabla
+from models.direccion import Direccion
 
 # Controladores
 from controllers import usuario_controller
@@ -15,6 +16,12 @@ from controllers.proveedor_controller import proveedor_bp
 from controllers.carrito_controller import carrito_bp
 from controllers.pedido_controller import pedido_bp
 from controllers.detalle_pedido_controller import detalle_pedido_bp
+from controllers.mensaje_controller import mensaje_bp
+from views.contacto_view import contacto_view
+from controllers.admin_pedido_controller import admin_pedido_bp
+from controllers.test_mail_controller import test_mail_bp
+from controllers.dashboard_controller import dashboard_bp
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,6 +30,17 @@ app.config["SECRET_KEY"] = "supersecreto"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "instance", "database.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# Configuración de correo con Gmail SMTP
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'ramosjhonatan659@gmail.com'
+app.config['MAIL_PASSWORD'] = 'ledx byup nooa ffpb'
+app.config['MAIL_DEFAULT_SENDER'] = 'ramosjhonatan659@gmail.com'
+
+mail.init_app(app)
+
+# Inicializar base de datos
 db.init_app(app)
 
 # Registro de blueprints
@@ -35,6 +53,14 @@ app.register_blueprint(proveedor_bp)
 app.register_blueprint(carrito_bp)
 app.register_blueprint(pedido_bp)
 app.register_blueprint(detalle_pedido_bp)
+app.register_blueprint(contacto_view)
+app.register_blueprint(admin_pedido_bp)
+app.register_blueprint(test_mail_bp)
+app.register_blueprint(mensaje_bp)
+app.register_blueprint(dashboard_bp)
+
+
+
 
 # Activar enlaces del menú
 @app.context_processor
@@ -62,7 +88,6 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-        # ✅ Crear usuario admin si no existe
         if not Usuario.query.filter_by(username='admin').first():
             admin = Usuario(
                 nombre='jhonatan',

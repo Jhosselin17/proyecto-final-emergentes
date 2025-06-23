@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket Pedido #{{ pedido.id }}</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      font-size: 10.5px;
+      color: #111;
+      margin: 5px;
+      width: 100%;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .separador {
+      border-top: 1px dashed #000;
+      margin: 6px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5px;
+    }
+
+    td, th {
+      padding: 2px 0;
+    }
+
+    th {
+      border-bottom: 1px dashed #000;
+    }
+
+    .qr {
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 9px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="center bold">
+  MI TIENDA S.R.L.<br>
+</div>
+<div class="center">
+  NIT: 1020304050<br>
+  Av. Comercio 123 - La Paz<br>
+  +591 71234567
+</div>
+
+<div class="separador"></div>
+
+<strong>Nº Pedido:</strong> {{ pedido.id }}<br>
+<strong>Fecha:</strong> {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}<br>
+<strong>Estado:</strong> {{ pedido.estado|capitalize }}<br>
+<strong>Pago:</strong> {{ pedido.metodo_pago|capitalize or 'No especificado' }}<br>
+
+{% if pedido.direccion %}
+<strong>Entrega:</strong><br>
+{{ pedido.direccion.direccion }}<br>
+{% if pedido.direccion.referencia %}
+Ref: {{ pedido.direccion.referencia }}<br>
+{% endif %}
+{% endif %}
+
+<div class="separador"></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Cant</th>
+      <th>P/U</th>
+      <th>Subt</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in detalles %}
+    <tr>
+      <td>{{ d.producto.nombre[:10] }}</td>
+      <td>{{ d.cantidad }}</td>
+      <td>Bs {{ '%.2f'|format(d.precio_unit) }}</td>
+      <td>Bs {{ '%.2f'|format(d.precio_unit * d.cantidad) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="separador"></div>
+<strong style="float:right">Total: Bs {{ '%.2f'|format(pedido.total) }}</strong><br style="clear:both">
+
+<div class="qr">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=70x70&data=Pedido%20{{ pedido.id }}" width="70" height="70">
+</div>
+
+<div class="footer">
+  ¡Gracias por tu compra!<br>
+  Esta factura no tiene validez fiscal.
+</div>
+
+</body>
+</html>

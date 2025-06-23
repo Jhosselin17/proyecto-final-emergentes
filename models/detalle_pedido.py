@@ -9,6 +9,7 @@ class DetallePedido(db.Model):
     cantidad = db.Column(db.Integer, nullable=False)
     precio_unit = db.Column(db.Float, nullable=False)
     subtotal = db.Column(db.Float, nullable=False)
+    producto = db.relationship('Producto', backref='detalles')
 
     def __init__(self, pedido_id, producto_id, cantidad, precio_unit):
         self.pedido_id = pedido_id

@@ -1,0 +1,25 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Editar Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h2 class="mb-4">Editar Pedido #{{ pedido.id }}</h2>
+
+  <form method="POST">
+    <div class="mb-3">
+      <label for="estado" class="form-label">Estado actual:</label>
+      <select class="form-select" name="estado" id="estado" required>
+        <option value="pendiente" {% if pedido.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+        <option value="confirmado" {% if pedido.estado == 'confirmado' %}selected{% endif %}>Confirmado</option>
+        <option value="enviado" {% if pedido.estado == 'enviado' %}selected{% endif %}>Enviado</option>
+        <option value="entregado" {% if pedido.estado == 'entregado' %}selected{% endif %}>Entregado</option>
+        <option value="cancelado" {% if pedido.estado == 'cancelado' %}selected{% endif %}>Cancelado</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Actualizar estado</button>
+    <a href="{{ url_for('admin_pedido.lista') }}" class="btn btn-secondary">Volver</a>
+  </form>
+</div>
+{% endblock %}

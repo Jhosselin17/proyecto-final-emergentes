@@ -1,6 +1,146 @@
 {% extends 'base_admin.html' %}
-{% block title %}Panel de Administración{% endblock %}
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">Panel de Administrador</h2>
-<p>Desde aquí podés gestionar usuarios, productos y más.</p>
+<div class="dashboard-container">
+  <div class="dashboard-header mb-4">
+    <h2><i class="fas fa-tachometer-alt me-2"></i>Panel General</h2>
+  </div>
+
+  <!-- Tarjetas principales -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="stat-card bg-primary text-white p-4 animate__animated animate__fadeInUp">
+        <div class="card-icon mb-2"><i class="fas fa-users fa-lg"></i></div>
+        <div class="card-value">{{ total_usuarios }}</div>
+        <div class="card-label">Usuarios registrados</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card bg-success text-white p-4 animate__animated animate__fadeInUp" data-aos-delay="100">
+        <div class="card-icon mb-2"><i class="fas fa-box-open fa-lg"></i></div>
+        <div class="card-value">{{ total_productos }}</div>
+        <div class="card-label">Productos activos</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card bg-info text-white p-4 animate__animated animate__fadeInUp" data-aos-delay="200">
+        <div class="card-icon mb-2"><i class="fas fa-clipboard-list fa-lg"></i></div>
+        <div class="card-value">{{ pedidos_hoy }}</div>
+        <div class="card-label">Pedidos hoy <small class="d-block text-light">{{ pedidos_semana }} esta semana</small></div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card bg-dark text-white p-4 animate__animated animate__fadeInUp" data-aos-delay="300">
+        <div class="card-icon mb-2"><i class="fas fa-envelope fa-lg"></i></div>
+        <div class="card-value">{{ mensajes_totales }}</div>
+        <div class="card-label">Mensajes <small class="d-block text-warning">{{ mensajes_pendientes }} sin responder</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Productos con stock bajo -->
+  <div class="card bg-danger text-white mb-4 shadow animate__animated animate__pulse animate__infinite">
+    <div class="card-body">
+      <h5 class="mb-3"><i class="fas fa-exclamation-triangle me-2"></i>Productos con stock crítico</h5>
+      <ul class="list-group list-group-flush">
+        {% for p in productos_bajos %}
+        <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-bottom border-light">
+          {{ p.nombre }}
+          <span class="badge bg-dark">{{ p.stock }} unidades</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-center text-light bg-transparent">Todos los productos tienen stock suficiente.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Últimos pedidos y mensajes -->
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card bg-dark text-white h-100">
+        <div class="card-header border-0 bg-transparent">
+          <h5 class="mb-0"><i class="fas fa-history me-2"></i>Últimos pedidos</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+{% for id, fecha, total, producto_nombre in ultimos_pedidos %}
+<li class="list-group-item bg-transparent border-0 text-white d-flex justify-content-between align-items-center">
+  <div>
+    <strong>#{{ id }}</strong><br>
+    <small class="text-light">{{ fecha.strftime('%d/%m/%Y') }} – {{ producto_nombre }}</small>
+  </div>
+  <span class="badge bg-success">Bs. {{ "%.2f"|format(total) }}</span>
+</li>
+{% else %}
+<li class="list-group-item text-center text-muted bg-transparent">No hay pedidos recientes.</li>
+{% endfor %}
+
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card bg-dark text-white h-100">
+        <div class="card-header border-0 bg-transparent">
+          <h5 class="mb-0"><i class="fas fa-comments me-2"></i>Últimos mensajes</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            {% for m in ultimos_mensajes %}
+            <li class="list-group-item bg-transparent border-0 d-flex justify-content-between align-items-center text-white">
+              <div>
+                <strong>{{ m.nombre }}</strong><br>
+                <small class="text-light">{{ m.email }}</small>
+              </div>
+              {% if m.respondido %}
+              <span class="badge bg-secondary">Respondido</span>
+              {% else %}
+              <span class="badge bg-warning text-dark">Sin responder</span>
+              {% endif %}
+            </li>
+            {% else %}
+            <li class="list-group-item text-center text-muted bg-transparent">No hay mensajes recientes.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  .stat-card {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+  .stat-card:hover {
+    transform: translateY(-4px);
+  }
+  .card-icon {
+    opacity: 0.9;
+  }
+  .card-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+  }
+  .card-label {
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+  .bg-purple {
+    background-color: #6f42c1 !important;
+  }
+  .list-group-item {
+    background: transparent;
+    color: #fff;
+  }
+</style>
 {% endblock %}

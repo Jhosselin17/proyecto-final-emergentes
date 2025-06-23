@@ -1,0 +1,94 @@
+{% extends 'base_admin.html' %}
+
+{% block title %}Detalle Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h2 class="mb-4 text-white">Detalle del Pedido #{{ pedido.id }}</h2>
+
+  <!-- Datos del cliente -->
+  <div class="card bg-light text-dark mb-4 p-3 shadow-sm">
+    <h5 class="text-primary">Cliente</h5>
+    <p><strong>Nombre:</strong> {{ pedido.usuario.nombre }}</p>
+    <p><strong>Correo:</strong> {{ pedido.usuario.email }}</p>
+    {% if pedido.usuario.telefono %}
+      <p><strong>Teléfono:</strong> {{ pedido.usuario.telefono }}</p>
+    {% endif %}
+  </div>
+
+  <!-- Información del pedido -->
+  <div class="card bg-light text-dark mb-4 p-3 shadow-sm">
+    <h5 class="text-primary">Información del Pedido</h5>
+    <p><strong>Fecha:</strong> {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</p>
+    <p><strong>Estado:</strong> 
+      <span class="badge bg-{{ 'warning' if pedido.estado == 'pendiente' else
+                               'primary' if pedido.estado == 'confirmado' else
+                               'info' if pedido.estado == 'enviado' else
+                               'success' if pedido.estado == 'entregado' else
+                               'danger' }}">{{ pedido.estado }}</span>
+    </p>
+    <p><strong>Método de Pago:</strong> {{ pedido.metodo_pago or 'No especificado' }}</p>
+    <p><strong>Total (Bs):</strong> {{ "%.2f"|format(pedido.total) }}</p>
+  </div>
+
+  <!-- Productos del pedido -->
+  <div class="card bg-light text-dark mb-4 p-3 shadow-sm">
+    <h5 class="text-primary">Productos</h5>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle">
+        <thead class="table-primary">
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio unitario (Bs)</th>
+            <th>Subtotal (Bs)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in pedido.detalles %}
+            <tr>
+              <td>{{ item.producto.nombre }}</td>
+              <td>{{ item.cantidad }}</td>
+              <td>{{ "%.2f"|format(item.precio_unit) }}</td>
+              <td>{{ "%.2f"|format(item.subtotal) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Factura (si hay) -->
+{% if pedido.factura %}
+  <div class="card bg-light text-dark mb-4 p-3 shadow-sm">
+    <h5 class="text-primary">Factura</h5>
+    <p>Factura generada el {{ pedido.factura.fecha.strftime('%d/%m/%Y') }}</p>
+
+    <a href="{{ url_for('static', filename=pedido.factura.archivo_pdf.replace('\\', '/') ) }}" class="btn btn-outline-success mb-2" target="_blank">
+      Ver archivo PDF
+    </a>
+
+    {% if pedido.usuario.celular %}
+      {% set celular = pedido.usuario.celular %}
+      {% set mensaje = (
+        "Hola " ~ pedido.usuario.nombre ~
+        ", aquí está tu factura del pedido #" ~ pedido.id|string ~ ": " ~
+        url_for('static', filename=pedido.factura.archivo_pdf.replace('\\', '/'), _external=True)
+      ) %}
+      {% set whatsapp_link = "https://wa.me/" ~ celular ~ "?text=" ~ mensaje | urlencode %}
+      {% if pedido.usuario.correo %}
+  <a href="{{ url_for('admin_pedido.enviar_factura_por_correo', pedido_id=pedido.id) }}" class="btn btn-outline-primary">
+    Enviar por Correo
+  </a>
+{% endif %}
+
+    {% endif %}
+  </div>
+{% endif %}
+
+
+  <a href="{{ url_for('admin_pedido.lista') }}" class="btn btn-outline-light mt-3">
+    ← Volver a la lista de pedidos
+  </a>
+</div>
+{% endblock %}

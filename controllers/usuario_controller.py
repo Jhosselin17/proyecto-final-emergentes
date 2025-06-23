@@ -4,6 +4,13 @@ import views.usuario_view as usuario_view
 
 usuario_bp = Blueprint('usuario', __name__, url_prefix='/usuarios')
 
+def normalizar_celular(celular):
+    if celular:
+        celular = celular.strip().replace(' ', '').replace('+', '')
+        if not celular.startswith('591'):
+            celular = '591' + celular
+    return celular
+
 @usuario_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -39,6 +46,8 @@ def guardar():
     nombre = request.form['nombre']
     username = request.form['username']
     password = request.form['password']
+    correo = request.form.get('correo')
+    celular = normalizar_celular(request.form.get('celular'))
     rol = "cliente"
 
     if not nombre or not username or not password:
@@ -50,7 +59,7 @@ def guardar():
         flash('El nombre de usuario ya existe.', 'warning')
         return redirect(url_for('usuario.registrar'))
 
-    nuevo_usuario = Usuario(nombre, username, password, rol)
+    nuevo_usuario = Usuario(nombre, username, password, rol, correo=correo, celular=celular)
     nuevo_usuario.save()
     flash('Usuario creado correctamente.', 'success')
     return redirect(url_for('usuario.login'))
@@ -74,8 +83,10 @@ def actualizar(id):
     username = request.form['username']
     password = request.form['password']
     rol = request.form['rol']
+    correo = request.form.get('correo')
+    celular = normalizar_celular(request.form.get('celular'))
 
-    usuario.update(nombre, username, password, rol)
+    usuario.update(nombre, username, password, rol, correo=correo, celular=celular)
     flash('Usuario actualizado correctamente.', 'success')
     return redirect(url_for('usuario.login'))
 

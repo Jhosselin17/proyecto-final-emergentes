@@ -1,0 +1,58 @@
+{% extends 'base_cliente.html' %}
+
+
+{% block content %}
+<div class="container mt-4">
+  <h3>Agregar nueva dirección</h3>
+
+  <form action="{{ url_for('cliente.guardar_direccion') }}" method="post">
+    <div class="mb-3">
+      <label for="direccion" class="form-label">Dirección</label>
+      <input type="text" name="direccion" id="direccion" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="referencia" class="form-label">Referencia</label>
+      <input type="text" name="referencia" id="referencia" class="form-control" placeholder="Ej: Frente a la tienda rosada">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Ubicación en el mapa</label>
+      <div id="map" style="height: 300px; border: 1px solid #ddd;"></div>
+    </div>
+
+    <!-- Coordenadas ocultas -->
+    <input type="hidden" name="latitud" id="latitud">
+    <input type="hidden" name="longitud" id="longitud">
+
+    <button type="submit" class="btn btn-primary">Guardar dirección</button>
+    <a href="{{ url_for('cliente.inicio') }}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+
+<!-- Leaflet.js -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  const map = L.map('map').setView([-16.5, -68.15], 13); // Centro aproximado El Alto/La Paz
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  let marker;
+
+  map.on('click', function (e) {
+    const { lat, lng } = e.latlng;
+    document.getElementById('latitud').value = lat;
+    document.getElementById('longitud').value = lng;
+
+    if (marker) {
+      marker.setLatLng([lat, lng]);
+    } else {
+      marker = L.marker([lat, lng]).addTo(map);
+    }
+  });
+</script>
+{% endblock %}

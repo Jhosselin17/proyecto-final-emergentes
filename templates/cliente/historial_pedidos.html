@@ -1,51 +1,254 @@
 {% extends 'base_cliente.html' %}
-{% block title %}Mis pedidos{% endblock %}
+{% block title %}Mis Pedidos{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <h3 class="mb-4 text-center">📦 Historial de pedidos</h3>
+<div class="container my-5">
+  <div class="text-center mb-5">
+    <h2 class="display-5 fw-bold mb-3 gradient-text">
+      <i class="fas fa-history me-2"></i>Historial de Pedidos
+    </h2>
+    <p class="text-muted">Revisa el estado y detalles de todos tus pedidos</p>
+  </div>
 
   {% if pedidos %}
-  <div class="table-responsive">
-    <table class="table table-bordered align-middle text-center">
-      <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          <th>Fecha</th>
-          <th>Total</th>
-          <th>Estado</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for pedido in pedidos %}
-        <tr>
-          <td>{{ pedido.id }}</td>
-          <td>{{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
-          <td>Bs {{ '%.2f'|format(pedido.total) }}</td>
-          <td>
-            <span class="badge bg-{{ 
-              'warning' if pedido.estado == 'pendiente' 
-              else 'info' if pedido.estado == 'enviado' 
-              else 'success' if pedido.estado == 'entregado' 
-              else 'danger' }}">
-              {{ pedido.estado.capitalize() }}
-            </span>
-          </td>
-          <td>
-            <a href="{{ url_for('detalle_pedido.detalle_cliente', pedido_id=pedido.id) }}" class="btn btn-outline-primary btn-sm">
-              Ver detalle
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+    {% for pedido in pedidos %}
+    <div class="col">
+      <div class="card h-100 border-0 rounded-4 overflow-hidden shadow-hover">
+        <div class="card-header position-relative">
+          <div class="status-ribbon 
+            {% if pedido.estado == 'pendiente' %}bg-warning
+            {% elif pedido.estado == 'enviado' %}bg-info
+            {% elif pedido.estado == 'entregado' %}bg-success
+            {% else %}bg-danger{% endif %}">
+            {% if pedido.estado == 'pendiente' %}
+              <i class="fas fa-hourglass-half me-1"></i>
+            {% elif pedido.estado == 'enviado' %}
+              <i class="fas fa-rocket me-1"></i>
+            {% elif pedido.estado == 'entregado' %}
+              <i class="fas fa-check-circle me-1"></i>
+            {% else %}
+              <i class="fas fa-exclamation-triangle me-1"></i>
+            {% endif %}
+            {{ pedido.estado|capitalize }}
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0 fw-bold">#{{ pedido.id }}</h3>
+            <div class="order-date text-end">
+              <small class="text-muted">{{ pedido.fecha.strftime('%d/%m/%Y') }}</small>
+              <div class="time">{{ pedido.fecha.strftime('%H:%M') }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="payment-method">
+              <i class="fas fa-credit-card me-2 text-primary"></i>
+              <span class="text-muted">{{ pedido.metodo_pago|capitalize }}</span>
+            </div>
+            <div class="total-amount">
+              <span class="h5 fw-bold text-gradient">Bs {{ '%.2f'|format(pedido.total) }}</span>
+            </div>
+          </div>
+          
+          <div class="progress-container mb-4">
+            <div class="progress-steps">
+              <div class="step {% if pedido.estado == 'pendiente' %}active{% endif %}">
+                <div class="step-icon"><i class="fas fa-cart-plus"></i></div>
+                <div class="step-label">Pedido</div>
+              </div>
+              <div class="step {% if pedido.estado == 'enviado' %}active{% endif %}">
+                <div class="step-icon"><i class="fas fa-shipping-fast"></i></div>
+                <div class="step-label">Enviado</div>
+              </div>
+              <div class="step {% if pedido.estado == 'entregado' %}active{% endif %}">
+                <div class="step-icon"><i class="fas fa-home"></i></div>
+                <div class="step-label">Entregado</div>
+              </div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill 
+                {% if pedido.estado == 'pendiente' %}w-33
+                {% elif pedido.estado == 'enviado' %}w-66
+                {% elif pedido.estado == 'entregado' %}w-100
+                {% else %}w-0{% endif %}">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-footer bg-transparent border-0 text-center">
+          <a href="{{ url_for('detalle_pedido.detalle_cliente', pedido_id=pedido.id) }}" 
+             class="btn btn-primary rounded-pill px-4 btn-hover-effect">
+            <i class="fas fa-eye me-2"></i>Ver Detalles
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
   </div>
   {% else %}
-  <div class="alert alert-info text-center">
-    No tenés pedidos registrados aún.
+  <div class="empty-state">
+    <div class="empty-state-icon">
+      <i class="fas fa-shopping-bag"></i>
+    </div>
+    <h3 class="empty-state-title">No hay pedidos registrados</h3>
+    <p class="empty-state-description">Aún no has realizado ningún pedido en nuestra plataforma</p>
+    <a href="{{ url_for('cliente.inicio') }}" class="btn btn-primary btn-lg rounded-pill glow-on-hover">
+      <i class="fas fa-store me-2"></i>Explorar Productos
+    </a>
   </div>
   {% endif %}
 </div>
+
+<style>
+  /* Estilos futuristas */
+  .gradient-text {
+    background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .shadow-hover {
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  .shadow-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+  }
+  
+  .status-ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 5px 15px;
+    color: white;
+    font-weight: bold;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
+  }
+  
+  .text-gradient {
+    background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .progress-container {
+    padding: 15px 0;
+  }
+  
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 10px;
+  }
+  
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+  }
+  
+  .step-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+    color: #6c757d;
+  }
+  
+  .step.active .step-icon {
+    background: #6a11cb;
+    color: white;
+    box-shadow: 0 0 0 5px rgba(106, 17, 203, 0.2);
+  }
+  
+  .step-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  
+  .step.active .step-label {
+    color: #6a11cb;
+    font-weight: bold;
+  }
+  
+  .progress-bar {
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    position: relative;
+    margin: 0 15px;
+  }
+  
+  .progress-fill {
+    position: absolute;
+    height: 100%;
+    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .empty-state-icon {
+    font-size: 5rem;
+    color: #6a11cb;
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+  
+  .empty-state-title {
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #343a40;
+  }
+  
+  .empty-state-description {
+    color: #6c757d;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+  }
+  
+  .glow-on-hover {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glow-on-hover:hover {
+    box-shadow: 0 0 15px rgba(106, 17, 203, 0.5);
+  }
+  
+  .btn-hover-effect {
+    transition: all 0.3s ease;
+  }
+  
+  .btn-hover-effect:hover {
+    transform: scale(1.05);
+  }
+  
+  .order-date .time {
+    font-weight: bold;
+    color: #343a40;
+  }
+</style>
 {% endblock %}

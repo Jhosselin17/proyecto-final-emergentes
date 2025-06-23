@@ -3,6 +3,13 @@ from models.carrito import Carrito
 from models.producto import Producto
 import views.carrito_view as carrito_view
 from database import db
+from models.pedido import Pedido
+from models.detalle_pedido import DetallePedido
+from models.direccion import Direccion
+from utils.generador_pdf import generar_y_guardar_factura
+from database import db
+from datetime import datetime
+
 
 carrito_bp = Blueprint('carrito', __name__, url_prefix='/carrito')
 
@@ -74,3 +81,53 @@ def actualizar(id):
         flash('No autorizado.', 'danger')
 
     return redirect(url_for('carrito.index'))
+
+@carrito_bp.route('/confirmar', methods=['POST'])
+def confirmar():
+    if session.get('rol') != 'cliente':
+        flash('Iniciá sesión como cliente para confirmar el pedido.', 'danger')
+        return redirect(url_for('usuario.login'))
+
+    usuario_id = session.get('id')
+    carrito = Carrito.query.filter_by(usuario_id=usuario_id).all()
+
+    if not carrito:
+        flash('Tu carrito está vacío.', 'warning')
+        return redirect(url_for('carrito.index'))
+
+    direccion_id = request.form.get('direccion_id')
+    direccion = Direccion.query.filter_by(id=direccion_id, usuario_id=usuario_id).first()
+    if not direccion:
+        flash('Dirección de entrega inválida.', 'danger')
+        return redirect(url_for('carrito.index'))
+
+    total = sum(item.producto.precio * item.cantidad for item in carrito)
+
+    pedido = Pedido(
+        usuario_id=usuario_id,
+        direccion_id=direccion.id,
+        fecha=datetime.utcnow(),
+        estado='pendiente',
+        metodo_pago='efectivo',
+        total=total
+    )
+    db.session.add(pedido)
+    db.session.commit()  # Commit para obtener ID del pedido
+
+    for item in carrito:
+        detalle = DetallePedido(
+            pedido_id=pedido.id,
+            producto_id=item.producto_id,
+            cantidad=item.cantidad,
+            precio_unit=item.producto.precio
+        )
+        db.session.add(detalle)
+        db.session.delete(item)  # Vacía el carrito
+
+    db.session.commit()
+
+    # 🔹 Generar automáticamente la factura en PDF al confirmar
+    generar_y_guardar_factura(pedido)
+
+    flash('🎉 Pedido confirmado con éxito. Tu factura fue generada automáticamente.', 'success')
+    return redirect(url_for('detalle_pedido.historial_cliente'))

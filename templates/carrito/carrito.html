@@ -1,73 +1,168 @@
 {% extends 'base_cliente.html' %}
-{% block title %}Carrito{% endblock %}
+{% block title %}Carrito de Compras{% endblock %}
 {% block content %}
 <div class="container mt-4">
-  <h2 class="mb-4 text-center">🛒 Tu carrito de compras</h2>
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0 text-center"><i class="fas fa-shopping-cart me-2"></i>Tu carrito de compras</h2>
+    </div>
+    
+    <div class="card-body">
+      {% if items %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th class="text-center" style="width: 120px;">Imagen</th>
+              <th>Producto</th>
+              <th class="text-center" style="width: 120px;">Precio unitario</th>
+              <th class="text-center" style="width: 160px;">Cantidad</th>
+              <th class="text-center" style="width: 120px;">Subtotal</th>
+              <th class="text-center" style="width: 80px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td class="text-center">
+                <img src="{{ item.producto.imagen }}" alt="{{ item.producto.nombre }}"
+                     class="img-thumbnail border-0"
+                     style="height: 70px; width: 70px; object-fit: contain;"
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/70x70?text=No+Imagen';">
+              </td>
+              <td>
+                <h6 class="mb-0">{{ item.producto.nombre }}</h6>
+                {% if item.producto.descripcion %}
+                <small class="text-muted">{{ item.producto.descripcion[:50] }}{% if item.producto.descripcion|length > 50 %}...{% endif %}</small>
+                {% endif %}
+              </td>
+              <td class="text-center">Bs. {{ '%.2f'|format(item.producto.precio) }}</td>
+              <td class="text-center">
+                <form action="{{ url_for('carrito.actualizar', id=item.id) }}" method="post" class="d-flex justify-content-center">
+                  <div class="input-group input-group-sm" style="width: 120px;">
+                    <input type="number" name="cantidad" min="1" max="99" value="{{ item.cantidad }}" 
+                           class="form-control text-center" aria-label="Cantidad">
+                    <button type="submit" class="btn btn-outline-primary" title="Actualizar">
+                      <i class="fas fa-sync-alt"></i>
+                    </button>
+                  </div>
+                </form>
+              </td>
+              <td class="text-center fw-bold">Bs. {{ '%.2f'|format(item.producto.precio * item.cantidad) }}</td>
+              <td class="text-center">
+                <a href="{{ url_for('carrito.eliminar', id=item.id) }}" 
+                   class="btn btn-sm btn-outline-danger" 
+                   onclick="return confirm('¿Estás seguro de eliminar este producto de tu carrito?')"
+                   title="Eliminar">
+                  <i class="fas fa-trash-alt"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-group-divider">
+            <tr class="table-light">
+              <td colspan="4" class="text-end fw-bold fs-5">Total a pagar:</td>
+              <td colspan="2" class="text-center fw-bold fs-5 text-success">Bs. {{ '%.2f'|format(total) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
 
-  {% if items %}
-  <div class="table-responsive">
-    <table class="table table-bordered align-middle text-center">
-      <thead class="table-dark">
-        <tr>
-          <th>Imagen</th>
-          <th>Producto</th>
-          <th>Precio unitario</th>
-          <th>Cantidad</th>
-          <th>Subtotal</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in items %}
-        <tr>
-          <td>
-            <img src="{{ item.producto.imagen }}" alt="{{ item.producto.nombre }}"
-                 style="height: 70px; object-fit: contain;"
-                 onerror="this.onerror=null; this.src='https://via.placeholder.com/100x70?text=No+Img';">
-          </td>
-          <td>{{ item.producto.nombre }}</td>
-          <td>Bs {{ '%.2f'|format(item.producto.precio) }}</td>
-          <td>
-            <form action="{{ url_for('carrito.actualizar', id=item.id) }}" method="post" class="d-flex justify-content-center align-items-center">
-              <input type="number" name="cantidad" min="1" value="{{ item.cantidad }}" class="form-control form-control-sm" style="width: 70px;">
-              <button type="submit" class="btn btn-sm btn-outline-success ms-2" title="Actualizar cantidad">
-                <i class="fas fa-sync-alt"></i>
-              </button>
-            </form>
-          </td>
-          <td>Bs {{ '%.2f'|format(item.producto.precio * item.cantidad) }}</td>
-          <td>
-            <a href="{{ url_for('carrito.eliminar', id=item.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar este producto?')">
-              <i class="fas fa-trash-alt"></i>
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr class="table-light fw-bold">
-          <td colspan="4" class="text-end">Total:</td>
-          <td colspan="2" class="text-start">Bs {{ '%.2f'|format(total) }}</td>
-        </tr>
-      </tfoot>
-    </table>
+      <form action="{{ url_for('pedido.confirmar') }}" method="post" class="mt-5">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card border-primary">
+              <div class="card-header bg-light">
+                <h4 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Dirección de entrega</h4>
+              </div>
+              <div class="card-body">
+                {% if direcciones %}
+                <select name="direccion_id" class="form-select mb-3" required>
+                  {% for dir in direcciones %}
+                  <option value="{{ dir.id }}">
+                    {{ dir.direccion }}{% if dir.referencia %} ({{ dir.referencia }}){% endif %}
+                  </option>
+                  {% endfor %}
+                </select>
+                <a href="{{ url_for('cliente.agregar_direccion') }}" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-plus me-1"></i>Agregar nueva dirección
+                </a>
+                {% else %}
+                <div class="alert alert-warning mb-0">
+                  <i class="fas fa-exclamation-triangle me-2"></i>No tienes direcciones registradas.
+                  <a href="{{ url_for('cliente.agregar_direccion') }}" class="alert-link">Agrega una aquí</a> para continuar.
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="card border-primary">
+              <div class="card-header bg-light">
+                <h4 class="mb-0"><i class="fas fa-credit-card me-2"></i>Método de pago</h4>
+              </div>
+              <div class="card-body">
+                <select name="metodo_pago" id="metodo_pago" class="form-select mb-3" required onchange="mostrarQR()">
+                  <option value="efectivo">Efectivo al recibir</option>
+                  <option value="QR">Pago con QR</option>
+                </select>
+                
+                <div id="contenedorQR" class="text-center p-3 bg-light rounded" style="display: none;">
+                  <p class="fw-bold mb-3"><i class="fas fa-qrcode me-2"></i>Escanea este código para pagar:</p>
+                  <img src="{{ url_for('static', filename='img/QR.jpeg') }}" 
+                       alt="Código QR de pago" 
+                       class="img-fluid border p-2 bg-white"
+                       style="max-width: 200px;">
+                  <p class="text-muted mt-2 mb-0"><small>El pedido se procesará al confirmar el pago</small></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{{ url_for('cliente.inicio') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Seguir comprando
+          </a>
+          <button type="submit" class="btn btn-success btn-lg" {% if not direcciones %}disabled{% endif %}>
+            <i class="fas fa-check-circle me-1"></i> Confirmar pedido
+          </button>
+        </div>
+      </form>
+
+      {% else %}
+      <div class="text-center py-5">
+        <div class="mb-4">
+          <i class="fas fa-shopping-cart fa-4x text-muted"></i>
+        </div>
+        <h4 class="mb-3">Tu carrito está vacío</h4>
+        <p class="text-muted mb-4">Agrega productos para comenzar tu compra</p>
+        <a href="{{ url_for('cliente.inicio') }}" class="btn btn-primary px-4">
+          <i class="fas fa-store me-1"></i> Ir a la tienda
+        </a>
+      </div>
+      {% endif %}
+    </div>
   </div>
-
-<form action="{{ url_for('pedido.confirmar') }}" method="post">
-  <button type="submit" class="btn btn-success">
-    <i class="fas fa-check me-1"></i> Realizar pedido
-  </button>
-</form>
-
-
-
-  {% else %}
-  <div class="alert alert-info text-center py-4">
-    <h5 class="mb-3">Tu carrito está vacío</h5>
-    <a href="{{ url_for('cliente.inicio') }}" class="btn btn-outline-primary">
-      <i class="fas fa-shopping-bag me-1"></i> Explorar productos
-    </a>
-  </div>
-  {% endif %}
 </div>
+
+<script>
+  function mostrarQR() {
+    const metodo = document.getElementById('metodo_pago').value;
+    const qrBox = document.getElementById('contenedorQR');
+    qrBox.style.display = metodo === 'QR' ? 'block' : 'none';
+    
+    // Animación suave
+    if (metodo === 'QR') {
+      qrBox.style.opacity = '0';
+      qrBox.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => { qrBox.style.opacity = '1'; }, 10);
+    }
+  }
+
+  // Mostrar u ocultar QR al cargar la página
+  document.addEventListener('DOMContentLoaded', mostrarQR);
+</script>
 {% endblock %}

@@ -11,6 +11,8 @@
         <th>ID</th>
         <th>Nombre</th>
         <th>Usuario</th>
+        <th>Correo</th>
+        <th>Celular</th>
         <th>Rol</th>
         <th>Acciones</th>
       </tr>
@@ -21,11 +23,13 @@
         <td>{{ usuario.id }}</td>
         <td>{{ usuario.nombre }}</td>
         <td>{{ usuario.username }}</td>
+        <td>{{ usuario.correo or 'N/D' }}</td>
+        <td>{{ usuario.celular or 'N/D' }}</td>
         <td>{{ usuario.rol|capitalize }}</td>
         <td>
-            <a href="{{ url_for('admin.editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-outline-warning me-2">
+          <a href="{{ url_for('admin.editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-outline-warning me-2">
             <i class="fas fa-edit"></i>
-            </a>
+          </a>
           <a href="#" onclick="confirmDelete('{{ usuario.id }}')" class="btn btn-sm btn-outline-danger">
             <i class="fas fa-trash-alt"></i>
           </a>

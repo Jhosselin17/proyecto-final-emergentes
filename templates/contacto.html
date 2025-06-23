@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Contacto - Tienda de Víveres{% endblock %}
+
+{% block content %}
+<div class="container my-5 py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="text-center mb-5" data-aos="fade-up">
+        <h2 class="display-5 fw-bold text-gradient-primary mb-3 animate__animated animate__fadeIn">
+          <i class="bi bi-chat-square-text-fill me-2"></i>¿Necesitás ayuda o querés dejarnos un mensaje?
+        </h2>
+        <p class="lead text-muted animate__animated animate__fadeIn">
+          <i class="bi bi-info-circle-fill me-2"></i>Estamos aquí para responder tus dudas, sugerencias o reclamos.
+        </p>
+      </div>
+
+      <form method="POST" action="{{ url_for('mensaje.enviar') }}" class="mx-auto bg-light p-4 rounded-4 shadow-sm" style="max-width: 600px;">
+        <div class="mb-4" data-aos="fade-up" data-aos-delay="100">
+          <label for="nombre" class="form-label fw-semibold text-primary">
+            <i class="bi bi-person-fill me-2"></i>Tu nombre
+          </label>
+          <input type="text" class="form-control py-2 border-primary border-2" id="nombre" name="nombre" required maxlength="100" placeholder="Ingresa tu nombre">
+        </div>
+
+        <div class="mb-4" data-aos="fade-up" data-aos-delay="150">
+          <label for="email" class="form-label fw-semibold text-primary">
+            <i class="bi bi-envelope-fill me-2"></i>Correo electrónico
+          </label>
+          <input type="email" class="form-control py-2 border-primary border-2" id="email" name="email" required maxlength="100" placeholder="ejemplo@correo.com">
+        </div>
+
+        <div class="mb-4" data-aos="fade-up" data-aos-delay="200">
+          <label for="telefono" class="form-label fw-semibold text-primary">
+            <i class="bi bi-telephone-fill me-2"></i>Número de celular (opcional)
+          </label>
+          <input type="text" class="form-control py-2 border-primary border-2" id="telefono" name="telefono" maxlength="20" placeholder="Ingresa tu número">
+        </div>
+
+        <div class="mb-4" data-aos="fade-up" data-aos-delay="250">
+          <label for="mensaje" class="form-label fw-semibold text-primary">
+            <i class="bi bi-pencil-fill me-2"></i>Mensaje
+          </label>
+          <textarea class="form-control py-2 border-primary border-2" id="mensaje" name="mensaje" rows="5" required placeholder="Escribe tu mensaje aquí..."></textarea>
+        </div>
+
+        <div class="text-center mt-4" data-aos="fade-up" data-aos-delay="300">
+          <button type="submit" class="btn btn-primary btn-gradient px-4 py-2 hvr-grow">
+            <i class="bi bi-send-fill me-2"></i>Enviar mensaje
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Añade esto en tu head o verifica que esté en base.html -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+<style>
+  .text-gradient-primary {
+    background: linear-gradient(45deg, #0d6efd, #20c997);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .btn-gradient {
+    background: linear-gradient(45deg, #0d6efd, #20c997);
+    border: none;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-gradient:hover {
+    background: linear-gradient(45deg, #0b5ed7, #1aa179);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  .hvr-grow {
+    display: inline-block;
+    vertical-align: middle;
+    transform: perspective(1px) translateZ(0);
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+    transition-duration: 0.3s;
+    transition-property: transform;
+  }
+  
+  .hvr-grow:hover, .hvr-grow:focus, .hvr-grow:active {
+    transform: scale(1.05);
+  }
+</style>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 800,
+    easing: 'ease-in-out-quad',
+    once: true
+  });
+</script>
+{% endblock %}

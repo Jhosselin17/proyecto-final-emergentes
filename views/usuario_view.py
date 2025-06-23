@@ -6,3 +6,4 @@ def login():
 
 def registrar():
     return render_template('usuarios/registrar.html')
+

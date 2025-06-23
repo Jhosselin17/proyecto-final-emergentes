@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Factura Pedido #{{ pedido.id }}</title>
+  <style>
+    body {
+      font-family: 'Helvetica', sans-serif;
+      margin: 40px;
+      color: #333;
+      font-size: 14px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .info-negocio {
+      text-align: right;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 0;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .datos {
+      margin-bottom: 25px;
+    }
+
+    .datos p {
+      margin: 4px 0;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-top: 30px;
+      margin-bottom: 8px;
+      font-size: 16px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      font-size: 13px;
+    }
+
+    th {
+      background-color: #f5f5f5;
+      text-align: left;
+    }
+
+    tfoot td {
+      font-weight: bold;
+    }
+
+    .agradecimiento {
+      margin-top: 40px;
+      font-style: italic;
+      text-align: center;
+      color: #555;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 12px;
+      text-align: center;
+      color: #777;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">MI TIENDA</div>
+  <div class="info-negocio">
+    contacto@mitienda.com<br>
+    +591 71234567<br>
+    Av. Comercio 123 - La Paz, Bolivia
+  </div>
+</header>
+
+<h2>COMPROBANTE DE PEDIDO</h2>
+
+<div class="datos">
+  <p><strong>Número de pedido:</strong> #{{ pedido.id }}</p>
+  <p><strong>Fecha:</strong> {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</p>
+  <p><strong>Estado:</strong> {{ pedido.estado|capitalize }}</p>
+  <p><strong>Método de pago:</strong> {{ pedido.metodo_pago|capitalize or 'No especificado' }}</p>
+  {% if pedido.direccion %}
+    <p><strong>Dirección de entrega:</strong> {{ pedido.direccion.direccion }}</p>
+    {% if pedido.direccion.referencia %}
+      <p><strong>Referencia:</strong> {{ pedido.direccion.referencia }}</p>
+    {% endif %}
+  {% endif %}
+</div>
+
+<div class="section-title">Detalle de productos</div>
+<table>
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Precio unitario</th>
+      <th>Cantidad</th>
+      <th>Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in detalles %}
+    <tr>
+      <td>{{ d.producto.nombre }}</td>
+      <td>Bs {{ '%.2f'|format(d.precio_unit) }}</td>
+      <td>{{ d.cantidad }}</td>
+      <td>Bs {{ '%.2f'|format(d.precio_unit * d.cantidad) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3" style="text-align: right;">Total:</td>
+      <td>Bs {{ '%.2f'|format(pedido.total) }}</td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="agradecimiento">
+  ¡Gracias por confiar en nosotros! Esperamos verte pronto.
+</div>
+
+<div class="footer">
+  MI TIENDA &copy; {{ pedido.fecha.year }} | www.mitienda.com | RUC: 12345678
+</div>
+
+</body>
+</html>
