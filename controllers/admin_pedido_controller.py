@@ -1,8 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
 from models.pedido import Pedido
 from database import db
 from flask_mail import Message
 from extensions import mail
+from flask import current_app
+
 
 admin_pedido_bp = Blueprint('admin_pedido', __name__, url_prefix='/admin/pedidos')
 
@@ -13,37 +15,16 @@ def lista():
 
 @admin_pedido_bp.route('/editar/<int:pedido_id>', methods=['GET', 'POST'])
 def editar(pedido_id):
-    from app import socketio  # Import diferido para evitar bucle circular
-
     pedido = Pedido.query.get_or_404(pedido_id)
 
     if request.method == 'POST':
         nuevo_estado = request.form.get('estado')
-
         if nuevo_estado in ['pendiente', 'confirmado', 'enviado', 'entregado', 'cancelado']:
-            if pedido.estado != nuevo_estado:
-                pedido.estado = nuevo_estado
-                db.session.commit()
-
-                mensaje = f'Tu pedido #{pedido.id} ha sido actualizado a: {nuevo_estado.capitalize()}'
-                flash('Estado actualizado correctamente.', 'success')
-
-                # 🧪 Debug en consola para verificar flujo
-                print('📦 Estado actualizado:', nuevo_estado)
-                print('👤 Usuario destinatario:', pedido.usuario_id)
-                print('📤 Emitiendo evento WebSocket...')
-
-                socketio.emit('pedido_actualizado', {
-                    'mensaje': mensaje,
-                    'usuario_id': pedido.usuario_id
-                }, to='*')
-
-                print('✅ Evento emitido con éxito')
-            else:
-                flash('No hubo cambios en el estado del pedido.', 'secondary')
+            pedido.estado = nuevo_estado
+            db.session.commit()
+            flash('Estado actualizado correctamente.', 'success')
         else:
             flash('Estado inválido.', 'danger')
-
         return redirect(url_for('admin_pedido.lista'))
 
     return render_template('admin/pedidos/editar.html', pedido=pedido)
@@ -55,6 +36,7 @@ def detalle(pedido_id):
 
 @admin_pedido_bp.route('/enviar-correo/<int:pedido_id>')
 def enviar_factura_por_correo(pedido_id):
+    from models.pedido import Pedido  # si no lo tenés importado ya
     pedido = Pedido.query.get_or_404(pedido_id)
 
     if not pedido.usuario.correo or not pedido.factura:
@@ -65,23 +47,28 @@ def enviar_factura_por_correo(pedido_id):
         ruta_pdf = f"static/{pedido.factura.archivo_pdf.replace('\\', '/')}"
         asunto = f"Factura Pedido #{pedido.id}"
         mensaje = (
-            f"🧾 ¡Hola {pedido.usuario.nombre}!\n\n"
-            f"Gracias por tu compra en nuestra tienda 🛍️.\n\n"
-            f"Adjuntamos tu factura correspondiente al pedido #{pedido.id} en formato PDF 📎.\n"
-            f"Si tenés alguna duda o necesitás más información, no dudes en contactarnos 😊.\n\n"
-            f"Saludos cordiales,\n"
-            f"El equipo de atención"
-        )
+                f"🧾 ¡Hola {pedido.usuario.nombre}!\n\n"
+                f"Gracias por tu compra en nuestra tienda 🛍️.\n\n"
+                f"Adjuntamos tu factura correspondiente al pedido #{pedido.id} en formato PDF 📎.\n"
+                f"Si tenés alguna duda o necesitás más información, no dudes en contactarnos 😊.\n\n"
+                f"Saludos cordiales,\n"
+                f"El equipo de atención"
+            )
 
-        msg = Message(subject=asunto, recipients=[pedido.usuario.correo], body=mensaje)
+        msg = Message(subject=asunto,
+                      recipients=[pedido.usuario.correo],
+                      body=mensaje)
 
         with current_app.open_resource(ruta_pdf) as fp:
-            msg.attach(filename=f"pedido_{pedido.id}.pdf", content_type="application/pdf", data=fp.read())
+            msg.attach(filename=f"pedido_{pedido.id}.pdf",
+                       content_type="application/pdf",
+                       data=fp.read())
 
         mail.send(msg)
         flash("📩 Correo enviado correctamente al cliente.", "success")
     except Exception as e:
-        print(f"❌ Error al enviar el correo: {e}")
-        flash("Hubo un error al enviar el correo.", "danger")
+        print(f"Error al enviar el correo: {e}")
+        flash("❌ Hubo un error al enviar el correo.", "danger")
 
     return redirect(url_for('admin_pedido.detalle', pedido_id=pedido_id))
+
