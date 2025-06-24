@@ -27,11 +27,17 @@ def eliminar_usuario(id):
         return redirect(url_for('usuario.login'))
 
     usuario = Usuario.query.get(id)
-    if usuario:
-        usuario.delete()
-        flash('Usuario eliminado correctamente.', 'success')
-    else:
+    if not usuario:
         flash('Usuario no encontrado.', 'danger')
+        return redirect(url_for('admin.lista_usuarios'))
+
+    # Verificar si tiene pedidos asociados
+    if usuario.pedidos and len(usuario.pedidos) > 0:
+        flash('No se puede eliminar este usuario porque ya ha realizado pedidos.', 'warning')
+        return redirect(url_for('admin.lista_usuarios'))
+
+    usuario.delete()
+    flash('Usuario eliminado correctamente.', 'success')
     return redirect(url_for('admin.lista_usuarios'))
 
 #aqui editamos a los usuarios registrados
@@ -53,7 +59,7 @@ def actualizar_usuario(id):
     if session.get('rol') != 'admin':
         flash('Acceso denegado.', 'danger')
         return redirect(url_for('usuario.login'))
-    
+
     usuario = Usuario.query.get(id)
     if not usuario:
         flash('Usuario no encontrado.', 'danger')
@@ -63,7 +69,10 @@ def actualizar_usuario(id):
     username = request.form['username']
     password = request.form['password']
     rol = request.form['rol']
+    correo = request.form.get('correo')
+    celular = request.form.get('celular')
 
-    usuario.update(nombre, username, password, rol)
+    usuario.update(nombre, username, password, rol, correo=correo, celular=celular)
+
     flash('Usuario actualizado correctamente.', 'success')
     return redirect(url_for('admin.lista_usuarios'))

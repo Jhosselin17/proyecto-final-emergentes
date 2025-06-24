@@ -1,45 +1,131 @@
 {% extends 'base_cliente.html' %}
 
-
 {% block content %}
-<div class="container mt-4">
-  <h3>Agregar nueva dirección</h3>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+      <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <!-- Encabezado con degradado -->
+        <div class="card-header bg-gradient-primary py-4">
+          <h2 class="text-white mb-0 text-center fw-bold">
+            <i class="fas fa-map-marker-alt me-2"></i>Registrar dirección
+          </h2>
+        </div>
+        
+        <div class="card-body p-4 p-lg-5">
+          <form action="{{ url_for('cliente.guardar_direccion') }}" method="post" class="needs-validation" novalidate>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="text" name="direccion" id="direccion" class="form-control border-2 border-primary rounded-3 shadow-sm" 
+                         placeholder=" " required>
+                  <label for="direccion" class="text-muted">
+                    <i class="fas fa-location-dot me-1 text-danger"></i> Dirección completa*
+                  </label>
+                </div>
+              </div>
 
-  <form action="{{ url_for('cliente.guardar_direccion') }}" method="post">
-    <div class="mb-3">
-      <label for="direccion" class="form-label">Dirección</label>
-      <input type="text" name="direccion" id="direccion" class="form-control" required>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="text" name="referencia" id="referencia" class="form-control border-2 border-primary rounded-3 shadow-sm" 
+                         placeholder=" ">
+                  <label for="referencia" class="text-muted">
+                    <i class="fas fa-flag me-1 text-secondary"></i> Punto de referencia
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botón de geolocalización -->
+            <div class="d-flex align-items-center mb-4 bg-light rounded-3 p-3">
+              <button type="button" class="btn btn-primary rounded-pill px-4 py-2 me-3" onclick="usarUbicacionActual()">
+                <i class="fas fa-location-crosshairs me-2"></i>Detectar ubicación
+              </button>
+              <small class="text-muted flex-grow-1">
+                <i class="fas fa-info-circle me-1"></i>Permite el acceso a tu ubicación para autocompletar
+              </small>
+            </div>
+
+            <!-- Mapa mejorado -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 text-dark" style="font-weight: 600;">
+                  <i class="fas fa-globe-americas me-2 text-info"></i>SELECCIONA EN EL MAPA
+                </h5>
+                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="centrarMapa()">
+                  <i class="fas fa-sync-alt me-1"></i>Reiniciar
+                </button>
+              </div>
+              <div id="map" class="rounded-3 border border-2 border-primary" style="height: 300px;"></div>
+              <small class="text-muted d-block mt-2">Haz clic en el mapa para marcar tu ubicación exacta</small>
+            </div>
+
+            <input type="hidden" name="latitud" id="latitud">
+            <input type="hidden" name="longitud" id="longitud">
+
+            <!-- Botones de acción -->
+            <div class="d-flex justify-content-between mt-5 pt-2">
+              <a href="{{ url_for('cliente.inicio') }}" class="btn btn-outline-danger rounded-pill px-4 py-2">
+                <i class="fas fa-times me-2"></i> Cancelar
+              </a>
+              <button type="submit" class="btn btn-success rounded-pill px-4 py-2 border-0" style="
+                background: linear-gradient(90deg, #00b09b 0%, #96c93d 100%);
+                box-shadow: 0 4px 15px rgba(0,176,155,0.3);
+              ">
+                <i class="fas fa-paper-plane me-2"></i> GUARDAR DIRECCIÓN
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-
-    <div class="mb-3">
-      <label for="referencia" class="form-label">Referencia</label>
-      <input type="text" name="referencia" id="referencia" class="form-control" placeholder="Ej: Frente a la tienda rosada">
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Ubicación en el mapa</label>
-      <div id="map" style="height: 300px; border: 1px solid #ddd;"></div>
-    </div>
-
-    <!-- Coordenadas ocultas -->
-    <input type="hidden" name="latitud" id="latitud">
-    <input type="hidden" name="longitud" id="longitud">
-
-    <button type="submit" class="btn btn-primary">Guardar dirección</button>
-    <a href="{{ url_for('cliente.inicio') }}" class="btn btn-secondary">Cancelar</a>
-  </form>
+  </div>
 </div>
 
-<!-- Leaflet.js -->
+<!-- Estilos adicionales -->
+<style>
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+  }
+  .form-control:focus {
+    border-color: #3a7bd5;
+    box-shadow: 0 0 0 0.25rem rgba(58, 123, 213, 0.25);
+  }
+  .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+</style>
+
+<!-- Leaflet CSS y JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  const map = L.map('map').setView([-16.5, -68.15], 13); // Centro aproximado El Alto/La Paz
+  // (El mismo código JavaScript que tenías originalmente)
+  const map = L.map('map').setView([-16.5, -68.15], 13);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+  const calle = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  });
+
+  const satelital = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri — Satélite',
+    maxZoom: 19
+  });
+
+  satelital.addTo(map);
+
+
+  const baseMaps = {
+    "🌐 Calle": calle,
+    "🛰️ Satelital": satelital
+  };
+  L.control.layers(baseMaps).addTo(map);
 
   let marker;
 
@@ -54,5 +140,42 @@
       marker = L.marker([lat, lng]).addTo(map);
     }
   });
+
+  function centrarMapa() {
+    map.setView([-16.5, -68.15], 13);
+  }
+
+  function usarUbicacionActual() {
+    if (!navigator.geolocation) {
+      Swal.fire('Permiso requerido', 'Tu navegador no permite acceder a la ubicación.', 'warning');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+
+      document.getElementById('latitud').value = lat;
+      document.getElementById('longitud').value = lon;
+
+      try {
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+        const res = await fetch(url, { headers: { 'User-Agent': 'NeoMarket' } });
+        const data = await res.json();
+        document.getElementById('direccion').value = data.display_name || 'Ubicación detectada';
+      } catch (err) {
+        document.getElementById('direccion').value = 'Ubicación detectada';
+      }
+
+      map.setView([lat, lon], 16);
+      if (marker) {
+        marker.setLatLng([lat, lon]);
+      } else {
+        marker = L.marker([lat, lon]).addTo(map);
+      }
+    }, (err) => {
+      Swal.fire('Ubicación denegada', 'No pudimos acceder a tu ubicación.', 'error');
+    });
+  }
 </script>
 {% endblock %}

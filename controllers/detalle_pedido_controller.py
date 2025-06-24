@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash
 from models.pedido import Pedido
 from models.detalle_pedido import DetallePedido
+from models.usuario import Usuario
 
 detalle_pedido_bp = Blueprint('detalle_pedido', __name__, url_prefix='/detalle-pedido')
 
@@ -13,7 +14,11 @@ def detalle_cliente(pedido_id):
         return redirect(url_for('cliente.inicio'))
 
     detalles = DetallePedido.query.filter_by(pedido_id=pedido.id).all()
-    return render_template('cliente/detalle_pedido.html', pedido=pedido, detalles=detalles)
+
+    cliente = Usuario.query.get(session.get('id'))  # 🔹 Ahora sí, lo pasás
+
+    return render_template('cliente/detalle_pedido.html', pedido=pedido, detalles=detalles, cliente=cliente)
+
 
 @detalle_pedido_bp.route('/historial')
 def historial_cliente():

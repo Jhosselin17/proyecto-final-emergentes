@@ -1,10 +1,13 @@
+import eventlet
+eventlet.monkey_patch()  # 👈 Esto permite usar WebSocket de verdad
+
 import os
 from flask import Flask, request, render_template, session
 from extensions import mail
 from database import db
 from models.usuario import Usuario
 from models.carrito import Carrito
-from models.direccion import Direccion
+from flask_socketio import SocketIO
 
 # Controladores
 from controllers import usuario_controller
@@ -22,7 +25,6 @@ from controllers.admin_pedido_controller import admin_pedido_bp
 from controllers.test_mail_controller import test_mail_bp
 from controllers.dashboard_controller import dashboard_bp
 
-
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
@@ -39,9 +41,10 @@ app.config['MAIL_PASSWORD'] = 'ledx byup nooa ffpb'
 app.config['MAIL_DEFAULT_SENDER'] = 'ramosjhonatan659@gmail.com'
 
 mail.init_app(app)
-
-# Inicializar base de datos
 db.init_app(app)
+
+# 🔥 Inicializar SocketIO con CORS habilitado
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Registro de blueprints
 app.register_blueprint(usuario_controller.usuario_bp)
@@ -58,9 +61,6 @@ app.register_blueprint(admin_pedido_bp)
 app.register_blueprint(test_mail_bp)
 app.register_blueprint(mensaje_bp)
 app.register_blueprint(dashboard_bp)
-
-
-
 
 # Activar enlaces del menú
 @app.context_processor
@@ -82,6 +82,7 @@ def cantidad_carrito():
 def home():
     return render_template("index.html")
 
+# 🟢 Ejecutar con eventlet y socketio
 if __name__ == "__main__":
     os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
 
@@ -98,4 +99,4 @@ if __name__ == "__main__":
             admin.save()
             print("✔ Usuario administrador creado (usuario: admin, clave: admin123)")
 
-    app.run(debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)

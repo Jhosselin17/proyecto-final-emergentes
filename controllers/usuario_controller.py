@@ -79,16 +79,21 @@ def actualizar(id):
         flash('Usuario no encontrado.', 'danger')
         return redirect(url_for('usuario.login'))
 
-    nombre = request.form['nombre']
-    username = request.form['username']
-    password = request.form['password']
-    rol = request.form['rol']
-    correo = request.form.get('correo')
-    celular = normalizar_celular(request.form.get('celular'))
+    usuario.nombre = request.form['nombre']
+    usuario.username = request.form['username']
+    usuario.rol = request.form['rol']
+    usuario.correo = request.form.get('correo')
+    usuario.celular = normalizar_celular(request.form.get('celular'))
 
-    usuario.update(nombre, username, password, rol, correo=correo, celular=celular)
+    nueva_contrasena = request.form['password']
+    if nueva_contrasena:
+        usuario.set_password(nueva_contrasena)  # Asegúrate de tener este método en el modelo
+
+    usuario.save()  # O db.session.commit() si lo estás manejando directamente
+
     flash('Usuario actualizado correctamente.', 'success')
-    return redirect(url_for('usuario.login'))
+    return redirect(url_for('admin.lista_usuarios'))  # Corrige esto si estabas redirigiendo al login por error
+
 
 @usuario_bp.route('/eliminar/<int:id>')
 def eliminar(id):

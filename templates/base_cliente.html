@@ -82,9 +82,9 @@
           <li class="nav-item" data-aos="fade-left" data-aos-delay="100">
             <a class="nav-link hvr-underline-from-center" href="{{ url_for('cliente.inicio') }}">Inicio</a>
           </li>
-          <li class="nav-item" data-aos="fade-left" data-aos-delay="200">
+            <!-- <li class="nav-item" data-aos="fade-left" data-aos-delay="200">
             <a class="nav-link hvr-underline-from-center" href="#">Categorías</a>
-          </li>
+            </li> -->
           <li class="nav-item" data-aos="fade-left" data-aos-delay="300">
             <a class="nav-link hvr-underline-from-center" href="{{ url_for('carrito.index') }}">
               <i class="fas fa-shopping-cart me-1"></i>Carrito
@@ -203,6 +203,49 @@
       }, 1000);
     }
   </script>
+  <!-- Conexión a Socket.IO -->
+{% if session.get('id') %}
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    const socket = io();
+    const usuarioActual = "{{ session['id'] }}";
+
+    console.log("👤 Usuario actual desde sesión:", usuarioActual);
+
+    socket.on('connect', () => {
+      console.log('🟢 Conectado a Socket.IO (cliente)');
+    });
+
+    socket.on('pedido_actualizado', data => {
+      console.log('📨 Evento recibido: pedido_actualizado');
+      console.log('📦 Contenido recibido:', data);
+      console.log('👥 ID del usuario conectado:', usuarioActual, '| ID del evento:', data.usuario_id);
+
+      if (String(data.usuario_id) === String(usuarioActual)) {
+        console.log('✅ El evento corresponde al usuario actual. Mostrando alerta.');
+        Swal.fire({
+          icon: 'info',
+          title: 'Notificación',
+          text: data.mensaje,
+          confirmButtonText: 'OK',
+          background: '#1f2937',
+          color: '#fff',
+          backdrop: 'rgba(0,0,0,0.7)'
+        });
+      } else {
+        console.log('⛔ Este evento no es para este usuario. Ignorado.');
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('🔌 Desconectado de WebSocket');
+    });
+
+    socket.on('connect_error', err => {
+      console.error('❌ Error de conexión con Socket.IO:', err);
+    });
+  </script>
+{% endif %}
 
 </body>
 </html>

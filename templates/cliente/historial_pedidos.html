@@ -2,86 +2,134 @@
 {% block title %}Mis Pedidos{% endblock %}
 
 {% block content %}
-<div class="container my-5">
+<div class="container py-5">
+  <!-- Encabezado mejorado -->
   <div class="text-center mb-5">
-    <h2 class="display-5 fw-bold mb-3 gradient-text">
-      <i class="fas fa-history me-2"></i>Historial de Pedidos
-    </h2>
-    <p class="text-muted">Revisa el estado y detalles de todos tus pedidos</p>
+    <div class="d-flex flex-column align-items-center">
+      <h1 class="display-4 fw-bold text-dark mb-3">
+        <i class="fas fa-history me-2 text-primary"></i>Historial de Pedidos
+      </h1>
+      <p class="lead text-muted mb-4">Revisa el estado y detalles de todos tus pedidos</p>
+      <div class="divider mx-auto bg-primary" style="width: 80px; height: 3px;"></div>
+    </div>
   </div>
 
   {% if pedidos %}
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
-    {% for pedido in pedidos %}
-    <div class="col">
-      <div class="card h-100 border-0 rounded-4 overflow-hidden shadow-hover">
-        <div class="card-header position-relative">
-          <div class="status-ribbon 
-            {% if pedido.estado == 'pendiente' %}bg-warning
-            {% elif pedido.estado == 'enviado' %}bg-info
-            {% elif pedido.estado == 'entregado' %}bg-success
-            {% else %}bg-danger{% endif %}">
-            {% if pedido.estado == 'pendiente' %}
-              <i class="fas fa-hourglass-half me-1"></i>
-            {% elif pedido.estado == 'enviado' %}
-              <i class="fas fa-rocket me-1"></i>
-            {% elif pedido.estado == 'entregado' %}
-              <i class="fas fa-check-circle me-1"></i>
-            {% else %}
-              <i class="fas fa-exclamation-triangle me-1"></i>
-            {% endif %}
-            {{ pedido.estado|capitalize }}
-          </div>
-          
-          <div class="d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0 fw-bold">#{{ pedido.id }}</h3>
-            <div class="order-date text-end">
-              <small class="text-muted">{{ pedido.fecha.strftime('%d/%m/%Y') }}</small>
-              <div class="time">{{ pedido.fecha.strftime('%H:%M') }}</div>
-            </div>
-          </div>
+  <!-- Filtros de pedidos -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-3 p-3 mb-4">
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+          <button class="btn btn-outline-primary rounded-pill px-4 filter-btn active" data-filter="all">
+            <i class="fas fa-list me-2"></i>Todos
+          </button>
+          <button class="btn btn-outline-warning rounded-pill px-4 filter-btn" data-filter="pendiente">
+            <i class="fas fa-hourglass-half me-2"></i>Pendientes
+          </button>
+          <button class="btn btn-outline-info rounded-pill px-4 filter-btn" data-filter="enviado">
+            <i class="fas fa-truck-fast me-2"></i>Enviados
+          </button>
+          <button class="btn btn-outline-success rounded-pill px-4 filter-btn" data-filter="entregado">
+            <i class="fas fa-check-circle me-2"></i>Entregados
+          </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de pedidos mejorada -->
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="pedidos-container">
+    {% for pedido in pedidos %}
+    <div class="col" data-status="{{ pedido.estado }}">
+      <div class="card h-100 border-0 rounded-4 overflow-hidden shadow-sm hover-effect">
+        <!-- Encabezado con estado -->
+  <div class="card-header position-relative bg-white border-bottom-0 pb-0">
+  <div class="text-center mb-3">
+    <div class="status-badge d-inline-block px-3 py-1 rounded-pill fw-semibold 
+      {% if pedido.estado == 'pendiente' %}bg-warning text-dark
+      {% elif pedido.estado == 'enviado' %}bg-info text-white
+      {% elif pedido.estado == 'entregado' %}bg-success text-white
+      {% else %}bg-danger text-white{% endif %}">
+      <i class="fas 
+        {% if pedido.estado == 'pendiente' %}fa-hourglass-half
+        {% elif pedido.estado == 'enviado' %}fa-truck-fast
+        {% elif pedido.estado == 'entregado' %}fa-check-circle
+        {% else %}fa-exclamation-triangle{% endif %} me-1"></i>
+      {{ pedido.estado|capitalize }}
+    </div>
+  </div>
+  <br>
+  <div class="d-flex justify-content-between align-items-center pt-2">
+    <h3 class="card-title mb-0 fw-bold text-dark">Pedido #{{ pedido.id }}</h3>
+    <div class="order-date text-end">
+      <div class="fw-semibold">{{ pedido.fecha.strftime('%d/%m/%Y') }}</div>
+      <small class="text-muted">{{ pedido.fecha.strftime('%H:%M') }}</small>
+    </div>
+  </div>
+</div>
+
         
+        <!-- Cuerpo de la tarjeta -->
         <div class="card-body">
+          <!-- Resumen del pedido -->
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="payment-method">
-              <i class="fas fa-credit-card me-2 text-primary"></i>
-              <span class="text-muted">{{ pedido.metodo_pago|capitalize }}</span>
+              <div class="d-flex align-items-center">
+                <div class="icon-circle-sm bg-primary text-white me-2">
+                  <i class="fas fa-credit-card"></i>
+                </div>
+                <div>
+                  <small class="text-muted d-block">Método</small>
+                  <span class="fw-semibold">{{ pedido.metodo_pago|capitalize }}</span>
+                </div>
+              </div>
             </div>
             <div class="total-amount">
-              <span class="h5 fw-bold text-gradient">Bs {{ '%.2f'|format(pedido.total) }}</span>
+              <div class="text-end">
+                <small class="text-muted d-block">Total</small>
+                <span class="h5 fw-bold text-primary">Bs {{ '%.2f'|format(pedido.total) }}</span>
+              </div>
             </div>
           </div>
           
-          <div class="progress-container mb-4">
-            <div class="progress-steps">
+          <!-- Barra de progreso mejorada -->
+          <div class="progress-track mb-4">
+            <div class="d-flex justify-content-between position-relative mb-2">
               <div class="step {% if pedido.estado == 'pendiente' %}active{% endif %}">
-                <div class="step-icon"><i class="fas fa-cart-plus"></i></div>
-                <div class="step-label">Pedido</div>
+                <div class="step-icon">
+                  <i class="fas fa-cart-plus"></i>
+                </div>
+                <small class="step-label">Pedido</small>
               </div>
               <div class="step {% if pedido.estado == 'enviado' %}active{% endif %}">
-                <div class="step-icon"><i class="fas fa-shipping-fast"></i></div>
-                <div class="step-label">Enviado</div>
+                <div class="step-icon">
+                  <i class="fas fa-shipping-fast"></i>
+                </div>
+                <small class="step-label">Enviado</small>
               </div>
               <div class="step {% if pedido.estado == 'entregado' %}active{% endif %}">
-                <div class="step-icon"><i class="fas fa-home"></i></div>
-                <div class="step-label">Entregado</div>
+                <div class="step-icon">
+                  <i class="fas fa-home"></i>
+                </div>
+                <small class="step-label">Entregado</small>
               </div>
             </div>
-            <div class="progress-bar">
-              <div class="progress-fill 
-                {% if pedido.estado == 'pendiente' %}w-33
-                {% elif pedido.estado == 'enviado' %}w-66
-                {% elif pedido.estado == 'entregado' %}w-100
-                {% else %}w-0{% endif %}">
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar 
+                {% if pedido.estado == 'pendiente' %}bg-warning w-33
+                {% elif pedido.estado == 'enviado' %}bg-info w-66
+                {% elif pedido.estado == 'entregado' %}bg-success w-100
+                {% else %}bg-danger w-0{% endif %}" 
+                role="progressbar">
               </div>
             </div>
           </div>
         </div>
         
-        <div class="card-footer bg-transparent border-0 text-center">
+        <!-- Pie de tarjeta -->
+        <div class="card-footer bg-white border-top-0 text-center pt-0">
           <a href="{{ url_for('detalle_pedido.detalle_cliente', pedido_id=pedido.id) }}" 
-             class="btn btn-primary rounded-pill px-4 btn-hover-effect">
+             class="btn btn-primary rounded-pill px-4 py-2 action-btn">
             <i class="fas fa-eye me-2"></i>Ver Detalles
           </a>
         </div>
@@ -90,64 +138,65 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-state">
-    <div class="empty-state-icon">
-      <i class="fas fa-shopping-bag"></i>
+  <!-- Estado vacío mejorado -->
+  <div class="empty-state text-center py-5">
+    <div class="empty-state-icon mb-4">
+      <i class="fas fa-shopping-bag fa-4x text-primary opacity-25"></i>
     </div>
-    <h3 class="empty-state-title">No hay pedidos registrados</h3>
-    <p class="empty-state-description">Aún no has realizado ningún pedido en nuestra plataforma</p>
-    <a href="{{ url_for('cliente.inicio') }}" class="btn btn-primary btn-lg rounded-pill glow-on-hover">
+    <h3 class="empty-state-title fw-bold mb-3">No hay pedidos registrados</h3>
+    <p class="empty-state-description text-muted mb-4">Aún no has realizado ningún pedido en nuestra plataforma</p>
+    <a href="{{ url_for('cliente.inicio') }}" class="btn btn-primary btn-lg rounded-pill px-5 py-3">
       <i class="fas fa-store me-2"></i>Explorar Productos
     </a>
   </div>
   {% endif %}
 </div>
 
+<!-- Estilos mejorados -->
 <style>
-  /* Estilos futuristas */
-  .gradient-text {
-    background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Estilos generales */
+  .divider {
+    background: linear-gradient(90deg, #3a7bd5 0%, #00d2ff 100%);
   }
   
-  .shadow-hover {
+  /* Efecto hover para tarjetas */
+  .hover-effect {
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
   }
   
-  .shadow-hover:hover {
+  .hover-effect:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    border-color: rgba(13,110,253,0.2);
   }
   
-  .status-ribbon {
+  /* Badge de estado */
+  .status-badge {
     position: absolute;
-    top: 0;
-    right: 0;
-    padding: 5px 15px;
-    color: white;
-    font-weight: bold;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
+    top: 15px;
+    right: 15px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
   
-  .text-gradient {
-    background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  
-  .progress-container {
-    padding: 15px 0;
-  }
-  
-  .progress-steps {
+  /* Icon circles */
+  .icon-circle-sm {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+  
+  /* Barra de progreso */
+  .progress-track {
     position: relative;
-    margin-bottom: 10px;
   }
   
   .step {
@@ -167,88 +216,114 @@
     justify-content: center;
     margin-bottom: 5px;
     color: #6c757d;
+    font-size: 0.8rem;
   }
   
   .step.active .step-icon {
-    background: #6a11cb;
+    background: #0d6efd;
     color: white;
-    box-shadow: 0 0 0 5px rgba(106, 17, 203, 0.2);
+    box-shadow: 0 0 0 5px rgba(13,110,253,0.1);
   }
   
   .step-label {
     font-size: 0.7rem;
     color: #6c757d;
-    text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 500;
   }
   
   .step.active .step-label {
-    color: #6a11cb;
-    font-weight: bold;
+    color: #0d6efd;
+    font-weight: 600;
   }
   
-  .progress-bar {
-    height: 4px;
-    background: #e9ecef;
-    border-radius: 2px;
-    position: relative;
-    margin: 0 15px;
-  }
-  
-  .progress-fill {
-    position: absolute;
-    height: 100%;
-    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
-    border-radius: 2px;
-    transition: width 0.6s ease;
-  }
-  
+  /* Estado vacío */
   .empty-state {
-    text-align: center;
-    padding: 60px 20px;
     max-width: 500px;
     margin: 0 auto;
+    padding: 3rem 1rem;
   }
   
   .empty-state-icon {
-    font-size: 5rem;
-    color: #6a11cb;
-    margin-bottom: 20px;
-    opacity: 0.8;
+    margin-bottom: 1.5rem;
   }
   
   .empty-state-title {
-    font-weight: 700;
-    margin-bottom: 15px;
-    color: #343a40;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
   }
   
   .empty-state-description {
-    color: #6c757d;
-    margin-bottom: 30px;
     font-size: 1.1rem;
+    margin-bottom: 2rem;
   }
   
-  .glow-on-hover {
-    position: relative;
-    overflow: hidden;
+  /* Botones de acción */
+  .action-btn {
+    transition: all 0.3s ease;
+    min-width: 160px;
   }
   
-  .glow-on-hover:hover {
-    box-shadow: 0 0 15px rgba(106, 17, 203, 0.5);
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(13,110,253,0.25);
   }
   
-  .btn-hover-effect {
+  /* Filtros */
+  .filter-btn {
     transition: all 0.3s ease;
   }
   
-  .btn-hover-effect:hover {
-    transform: scale(1.05);
+  .filter-btn.active {
+    background: linear-gradient(90deg, #3a7bd5 0%, #00d2ff 100%);
+    color: white !important;
+    border-color: transparent !important;
   }
   
-  .order-date .time {
-    font-weight: bold;
-    color: #343a40;
+  /* Responsive */
+  @media (max-width: 767.98px) {
+    .progress-track {
+      padding: 0 10px;
+    }
+    
+    .filter-btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
   }
 </style>
+
+<!-- Script para filtrado -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const pedidosContainer = document.getElementById('pedidos-container');
+    
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Remover clase active de todos los botones
+        filterBtns.forEach(b => b.classList.remove('active'));
+        
+        // Agregar clase active al botón clickeado
+        this.classList.add('active');
+        
+        const filter = this.getAttribute('data-filter');
+        const pedidos = pedidosContainer.querySelectorAll('.col');
+        
+        if (filter === 'all') {
+          pedidos.forEach(pedido => {
+            pedido.style.display = 'block';
+          });
+        } else {
+          pedidos.forEach(pedido => {
+            if (pedido.getAttribute('data-status') === filter) {
+              pedido.style.display = 'block';
+            } else {
+              pedido.style.display = 'none';
+            }
+          });
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

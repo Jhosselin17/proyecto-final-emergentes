@@ -54,7 +54,7 @@ def agregar():
     db.session.add(producto)
     db.session.commit()
 
-    flash(f'Se añadieron {cantidad} unidades de "{producto.nombre}" al carrito.', 'success')
+    flash(f'Se añadieron {cantidad} unidades de {producto.nombre.capitalize()} al carrito.', 'success')
     return redirect(url_for('cliente.inicio'))
 
 @carrito_bp.route('/eliminar/<int:id>')
